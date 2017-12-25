@@ -1,0 +1,14 @@
+﻿<Project Sdk="Microsoft.NET.Sdk">
+
+  <PropertyGroup>
+    <TargetFrameworks>netstandard2.0</TargetFrameworks>
+    <Authors>Lykke</Authors>
+    <Company>Lykke</Company>
+    <Product>NBitcoin.Zcash</Product>
+  </PropertyGroup>
+
+  <ItemGroup>
+    <PackageReference Include="NBitcoin" Version="4.0.0.50" />
+  </ItemGroup>
+
+</Project>
