@@ -2,6 +2,7 @@
 
   <PropertyGroup>
     <TargetFrameworks>netstandard2.0</TargetFrameworks>
+    <Version>1.0.0</Version>
     <Authors>Lykke</Authors>
     <Company>Lykke</Company>
     <Product>NBitcoin.Zcash</Product>
