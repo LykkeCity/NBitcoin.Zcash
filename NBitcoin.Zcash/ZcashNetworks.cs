@@ -6,7 +6,7 @@ using NBitcoin.Crypto;
 using NBitcoin.DataEncoders;
 using NBitcoin.Protocol;
 
-namespace NBitcoin
+namespace NBitcoin.Zcash
 {
     public class ZcashNetworks
 	{
