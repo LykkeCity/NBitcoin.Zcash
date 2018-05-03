@@ -5,7 +5,5 @@ Zcash support for NBitcoin project.
 Use
 
 ```
-NBitcoin.Zcash.ZcashNetworks.Register();
+NBitcoin.Zcash.ZcashNetworks.Instance.EnsureRegistered();
 ```
-
-or just begin to use NBitcoin with `NBitcoin.Zcash.ZcashNetworks.Mainnet` or `NBitcoin.Zcash.ZcashNetworks.Testnet`.
