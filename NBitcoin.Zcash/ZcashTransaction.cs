@@ -66,9 +66,6 @@ namespace NBitcoin.Zcash
         private readonly char[] ZCASH_PREVOUTS_HASH_PERSONALIZATION = new char[] {'Z','c','a','s','h','P','r','e','v','o','u','t','H','a','s','h'};
         private readonly char[] ZCASH_SEQUENCE_HASH_PERSONALIZATION = new char[] {'Z','c','a','s','h','S','e','q','u','e','n','c','H','a','s','h'};
         private readonly char[] ZCASH_OUTPUTS_HASH_PERSONALIZATION = new char[] {'Z','c','a','s','h','O','u','t','p','u','t','s','H','a','s','h'};
-        private readonly char[] ZCASH_JOINSPLITS_HASH_PERSONALIZATION = new char[] {'Z','c','a','s','h','J','S','p','l','i','t','s','H','a','s','h'};
-        private readonly char[] ZCASH_SHIELDED_SPENDS_HASH_PERSONALIZATION = new char[] {'Z','c','a','s','h','S','S','p','e','n','d','s','H','a','s','h'};
-        private readonly char[] ZCASH_SHIELDED_OUTPUTS_HASH_PERSONALIZATION = new char[] {'Z','c','a','s','h','S','O','u','t','p','u','t','H','a','s','h'};
 
         private uint nVersionGroupId = 0;
         private uint nExpiryHeight = 0;
@@ -141,15 +138,6 @@ namespace NBitcoin.Zcash
                         hashOutputs = ss.GetHash();
                     }
                 }
-
-                // Shielded transactions are not supported, pseudocode below is for reference only.
-                // See https://github.com/zcash/zcash/blob/0753a0e8a91fec42e0ab424452909d3b02da1afa/src/script/interpreter.cpp#L1159 for original code:
-                //
-                // if (JoinSplits.Any())
-                // {
-                //     hashJoinSplits = precomputedTransactionData == null ?
-                //                      GetHashJoinSplits() : precomputedTransactionData.HashJoinSplits;
-                // }
 
                 var branchId =
                     Version == OVERWINTER_VERSION ? OVERWINTER_BRANCH_ID :
