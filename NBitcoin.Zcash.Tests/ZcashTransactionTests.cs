@@ -1,5 +1,8 @@
 ﻿using System;
+using System.Collections.Generic;
+using System.IO;
 using System.Linq;
+using Newtonsoft.Json;
 using Xunit;
 
 namespace NBitcoin.Zcash.Tests
@@ -60,7 +63,7 @@ namespace NBitcoin.Zcash.Tests
         [Fact]
         public void ShouldThrow_IfTransactionIsShielded()
         {
-            Assert.Throws<FormatException>(() => new ZcashTransaction(v2));
+            Assert.Throws<NotSupportedException>(() => new ZcashTransaction(v2));
         }
 
         [Fact]
@@ -145,6 +148,39 @@ namespace NBitcoin.Zcash.Tests
             Assert.Equal(
                 "0400008085202f89010763a91de5fff9ba149c65eedea8588e955cc7bd16a8298ae89750c0b78fabe7010000006a473044022050b543d7c4f6b5abc78421cb09651789225a1ddd93edabc2ab430a9b1e3f2ce7022066af0db26f7b2406de2bf4e48e3d5bfbeebc7b09d109bbd9819f29405025215901210250b36ab2839e868e6c12c9cb252c3d7b71b61a7039e3c6a55a53cac6f8a1c17bffffffff0240420f00000000001976a9141fecb553b1cff0364a7308ffd9ec8169495cf47288ac6fc11710000000001976a9147176f5d11e11c59a1248ef0bf0d6dadb2be1686188ac00000000c943ff020000000000000000000000",
                 tx.ToHex());
+        }
+
+        [Theory]
+        [MemberData(nameof(GetTestVectors))]
+        public void ShouldSignTestVectors(string rawTransaction, string script, int vin, long hashType, uint branchId, string expected)
+        {
+            try
+            {
+                var tx = new ZcashTransaction(rawTransaction);
+
+                var actualBytesReversed = tx.GetSignatureHash(new Script(script), vin, (SigHash)hashType, Money.Zero, HashVersion.Original, null)
+                    .ToBytes()
+                    .Reverse()
+                    .ToArray();
+
+                Assert.Equal(expected, new uint256(actualBytesReversed).ToString());
+            }
+            catch (NotSupportedException) 
+            {
+                Console.WriteLine("Skipped shielded tx test");
+            }
+        }
+
+        public static IEnumerable<object[]> GetTestVectors()
+        {
+            var vectors = JsonConvert.DeserializeObject<object[][]>(File.ReadAllText(Path.Combine(Environment.CurrentDirectory, "../../../sighash1.json")));
+            for (int i = 1; i < vectors.Length; i++)
+            {
+                if ((long)vectors[i][3] >= 0)
+                {
+                    yield return vectors[i];
+                }
+            }
         }
     }
 }

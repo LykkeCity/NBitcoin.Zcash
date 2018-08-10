@@ -29,8 +29,8 @@ namespace NBitcoin.Zcash
             public uint256 anchor;
             public uint256 nullifier;
             public uint256 rk;
-            public byte[] zkproof; // length = GROTH_PROOF_SIZE
-            public byte[] spendAuthSig; // length = 64
+            public byte[] zkproof = new byte[GROTH_PROOF_SIZE];
+            public byte[] spendAuthSig = new byte[64];
 
             public void ReadWrite(BitcoinStream stream)
             {
@@ -48,9 +48,9 @@ namespace NBitcoin.Zcash
             public uint256 cv;
             public uint256 cm;
             public uint256 ephemeralKey;
-            public byte[] encCiphertext; // length = ZC_SAPLING_ENCCIPHERTEXT_SIZE;
-            public byte[] outCiphertext; // length = ZC_SAPLING_OUTCIPHERTEXT_SIZE
-            public byte[] zkproof;
+            public byte[] encCiphertext = new byte[ZC_SAPLING_ENCCIPHERTEXT_SIZE];
+            public byte[] outCiphertext = new byte[ZC_SAPLING_OUTCIPHERTEXT_SIZE];
+            public byte[] zkproof = new byte[GROTH_PROOF_SIZE];
 
             public void ReadWrite(BitcoinStream stream)
             {
@@ -63,6 +63,21 @@ namespace NBitcoin.Zcash
             }
         }
 
+        public class JSDescription : IBitcoinSerializable
+        {
+            private long vpub_old;
+            private long vpub_new;
+            private uint256 anchor;
+            private uint256[] nullifiers = new uint256[2];
+            private uint256[] commitments = new uint256[2];
+            private uint256 ephemeralKey;
+            private byte[][] ciphertexts = new byte[2][] { new byte[601], new byte[601] };
+            private uint256 randomSeed = uint256.Zero;
+            private uint256[] macs = new uint256[2];
+            libzcash::SproutProof proof;
+
+        }
+
         private readonly char[] ZCASH_PREVOUTS_HASH_PERSONALIZATION = new char[] {'Z','c','a','s','h','P','r','e','v','o','u','t','H','a','s','h'};
         private readonly char[] ZCASH_SEQUENCE_HASH_PERSONALIZATION = new char[] {'Z','c','a','s','h','S','e','q','u','e','n','c','H','a','s','h'};
         private readonly char[] ZCASH_OUTPUTS_HASH_PERSONALIZATION = new char[] {'Z','c','a','s','h','O','u','t','p','u','t','s','H','a','s','h'};
@@ -73,6 +88,9 @@ namespace NBitcoin.Zcash
         private VarInt nJoinSplit = new VarInt();
         private List<ZcashSpendDescription> vShieldedSpend = new List<ZcashSpendDescription>();
         private List<ZcashOutputDescription> vShieldedOutput = new List<ZcashOutputDescription>();
+        private uint256 joinSplitPubKey;
+        private byte[] joinSplitSig = new byte[64];
+        private byte[] bindingSig = new byte[64];
 
         public ZcashTransaction()
         {
@@ -190,7 +208,7 @@ namespace NBitcoin.Zcash
 
                     // Shielded transactions are not supported, condition below is always true.
                     // See https://github.com/zcash/zcash/blob/0753a0e8a91fec42e0ab424452909d3b02da1afa/src/script/interpreter.cpp#L1189 for original code:
-                    if (nIn != uint.MaxValue)
+                    if (nIn != int.MaxValue)
                     {
                         // The input being signed (replacing the scriptSig with scriptCode + amount)
                         // The prevout may already be contained in hashPrevout, and the nSequence
@@ -249,8 +267,16 @@ namespace NBitcoin.Zcash
 
                 if (nJoinSplit.ToLong() > 0)
                 {
-                    throw new FormatException($"Shielded (z-) transactions are not supported.");
+                    stream.ReadWrite(ref joinSplitPubKey);
+                    stream.ReadWrite(ref joinSplitSig);
+
+                    throw new NotSupportedException($"Shielded (z-) transactions are not supported.");
                 }
+            }
+
+            if (nVersion >= SAPLING_VERSION && (vShieldedSpend.Any() || vShieldedOutput.Any()))
+            {
+                stream.ReadWrite(ref bindingSig);
             }
 
             // update base class properties for value types
