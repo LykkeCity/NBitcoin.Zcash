@@ -5,7 +5,7 @@ using Org.BouncyCastle.Crypto.Digests;
 
 namespace NBitcoin.Zcash
 {
-    public class BLAKE2bWriter : BitcoinStream, IDisposable
+    public class BLAKE2bWriter : ZcashStream, IDisposable
     {
         private byte[] _personalization;
 
